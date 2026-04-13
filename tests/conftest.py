@@ -4,26 +4,25 @@ import copy
 from src.app import app, activities
 
 
+# Store original activities state at module import time
+ORIGINAL_ACTIVITIES = copy.deepcopy(activities)
+
+
 @pytest.fixture
 def client():
     """Provides a TestClient for making requests to the app"""
     return TestClient(app)
 
 
-@pytest.fixture
-def clean_activities():
-    """Provides a fresh copy of activities data for each test"""
-    return copy.deepcopy(activities)
-
-
 @pytest.fixture(autouse=True)
-def reset_activities(clean_activities):
-    """Automatically reset activities before each test"""
-    # Clear existing activities
+def reset_activities():
+    """Automatically reset activities before and after each test"""
+    # Reset before test
     activities.clear()
-    # Repopulate with clean data
-    activities.update(clean_activities)
+    activities.update(copy.deepcopy(ORIGINAL_ACTIVITIES))
+    
     yield
-    # Cleanup after test
+    
+    # Reset after test
     activities.clear()
-    activities.update(clean_activities)
+    activities.update(copy.deepcopy(ORIGINAL_ACTIVITIES))
